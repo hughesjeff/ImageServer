@@ -6,13 +6,19 @@ task wrapper(type: Wrapper) {
 }
 
 apply plugin: 'java'
-apply plugin: 'application'
-mainClassName = "TensorTest"
 
 sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
+}
+
+task(run, dependsOn: 'classes', type: JavaExec) {
+    main = 'com.MyMain'
+    classpath=sourceSets.main.runtimeClasspath
+    classpath+=sourceSets.test.runtimeClasspath
+    classpath+=sourceSets.main.resources
+    systemProperty "java.library.path", "jni/"
 }
 
 dependencies {
