@@ -1,10 +1,24 @@
-import org.tensorflow.TensorFlow;
+import org.tensorflow.*;
 
-/**
- * Created by jeff on 3/8/17.
- */
+// This will eventually become the API for the server
+
 public class TensorTest {
-    public static void main(String[] args) {
-        System.out.println("I'm using TensorFlow version: " +  TensorFlow.version());
+    public static void main(String[] args) throws Exception {
+        try (Graph g = new Graph()) {
+            final String value = "Hello from " + TensorFlow.version();
+
+            // Construct the computation graph with a single operation, a constant
+            // named "MyConst" with a value "value".
+            try (Tensor t = Tensor.create(value.getBytes("UTF-8"))) {
+                // The Java API doesn't yet include convenience functions for adding operations.
+                g.opBuilder("Const", "MyConst").setAttr("dtype", t.dataType()).setAttr("value", t).build();
+            }
+
+            // Execute the "MyConst" operation in a Session.
+            try (Session s = new Session(g);
+                 Tensor output = s.runner().fetch("MyConst").run().get(0)) {
+                System.out.println(new String(output.bytesValue(), "UTF-8"));
+            }
+        }
     }
 }
